@@ -1,29 +1,44 @@
 #!/bin/bash
 
-sudo steamos-readonly disable
-
-# Define variables
-SERVICE_URL="https://raw.githubusercontent.com/thegremlinlives/disable-cpu-boost.service"
 SERVICE_DEST="/etc/systemd/system/disable-cpu-boost.service"
 
-# Download the service file directly to the destination
-sudo curl -sSL "$SERVICE_URL" -o "$SERVICE_DEST"
+# 1. Unlock SteamOS
+sudo steamos-readonly disable
 
-# Set standard permissions (root-owned, 644)
-sudo chown root:root "$SERVICE_DEST"
+# 2. Complete Cleanup
+sudo systemctl disable disable-cpu-boost.service --now >/dev/null 2>&1
+sudo rm -f "$SERVICE_DEST"
+
+# 3. Create the file using a clean heredoc
+# We use /bin/sh -c to ensure the redirect happens inside a shell context
+sudo tee "$SERVICE_DEST" > /dev/null <<'EOF'
+[Unit]
+Description=Disable CPU Boost
+After=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/bash -c "echo 0 > /sys/devices/system/cpu/cpufreq/boost"
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# 4. Standardize File Permissions
 sudo chmod 644 "$SERVICE_DEST"
+sudo chown root:root "$SERVICE_DEST"
 
-# Reload and activate
+# 5. Reload and Start
 sudo systemctl daemon-reload
-sudo systemctl enable --now disable-cpu-boost.service
-
-# Final Check
-STATUS=$(cat /sys/devices/system/cpu/cpufreq/boost)
-if [ "$STATUS" = "0" ]; then
-    echo "Done: CPU Boost is disabled."
+if sudo systemctl enable --now disable-cpu-boost.service; then
+    echo "SUCCESS: Service installed and boost disabled."
+    # Verify the actual hardware state
+    echo "Current Boost State: $(cat /sys/devices/system/cpu/cpufreq/boost)"
 else
-    echo "Error: CPU Boost is still active."
+    echo "FAIL: Check 'systemctl status disable-cpu-boost.service' for the specific line error."
 fi
 
+# 6. Re-lock SteamOS
 sudo steamos-readonly enable
 
