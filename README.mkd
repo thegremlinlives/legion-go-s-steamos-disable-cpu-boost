@@ -7,4 +7,5 @@ This service disables CPU boost on the Z2 Go chip to reduce operating temperatur
 Run the following command in the terminal to download and enable the service:
 
 ```bash
-curl -L [https://raw.githubusercontent.com/](https://raw.githubusercontent.com/)[YOUR_USERNAME]/[YOUR_REPO]/main/install.sh | bash
+https://github.com/thegremlinlives/legion-go-s-steamos-disable-cpu-boost/install.sh | bash
+```
