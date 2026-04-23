@@ -1,0 +1,12 @@
+[Unit]
+Description=Disable CPU Boost on Startup
+After=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/sh -c 'echo 0 > /sys/devices/system/cpu/cpufreq/boost'
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+
