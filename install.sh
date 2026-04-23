@@ -1,5 +1,7 @@
 #!/bin/bash
 
+sudo steamos-readonly disable
+
 # Define variables
 SERVICE_URL="https://raw.githubusercontent.com/thegremlinlives/disable-cpu-boost.service"
 SERVICE_DEST="/etc/systemd/system/disable-cpu-boost.service"
@@ -22,4 +24,6 @@ if [ "$STATUS" = "0" ]; then
 else
     echo "Error: CPU Boost is still active."
 fi
+
+sudo steamos-readonly enable
 
